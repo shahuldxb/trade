@@ -1,0 +1,21 @@
+import { useLocation } from 'react-router';
+
+import { useMenuCurrentItem } from '@/components/menu';
+import { useMenus } from '@/providers';
+
+import { IToolbarPageTitleProps } from './types';
+
+const ToolbarPageTitle = ({ text, className = '' }: IToolbarPageTitleProps) => {
+  const { pathname } = useLocation();
+  const { getMenuConfig } = useMenus();
+  const menuConfig = getMenuConfig('primary');
+  const menuItem = useMenuCurrentItem(pathname, menuConfig);
+
+  return (
+    <h1 className={`text-2xl font-bold  leading-none text-gray-900 ${className}`.trim()}>
+      {text ?? menuItem?.title}
+    </h1>
+  );
+};
+
+export { ToolbarPageTitle };
