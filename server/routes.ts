@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 import { apiRouter } from "./mlc_routes";
 import vesselRoutes from "./vessel_routes";
 import { getAllHealth } from "./Health";
+import statusRouter from "./statusRoutes";
 
 // export async function registerRoutes(app: Express): Promise<Server> {
 // ------------------------------
@@ -63,6 +64,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(PromptRouter);
   app.use("/api", apiRouter);
   app.use("/api", vesselRoutes);
+  // ------------------------------------
+  // Enhanced Status & Diagnostics routes
+  // ------------------------------------
+  app.use(statusRouter);
 
 
   // ------------------------------------

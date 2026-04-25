@@ -23,15 +23,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 router = APIRouter(prefix="/api/lc", tags=["trade_qa"])
 logger = logging.getLogger(__name__)
-# Initialize RAG pipeline
+# Initialize RAG pipeline (lazy — errors deferred to request time)
+rag_pipeline = None
 try:
     rag_pipeline = EnhancedRAGPipeline(max_iters=3, min_iters=1)
     logger.info("RAG pipeline initialized successfully")
 except Exception as e:
     logger.error(f"Failed to initialize RAG pipeline: {str(e)}")
-    raise HTTPException(
-        status_code=500, detail=f"Failed to initialize RAG pipeline: {str(e)}"
-    )
+    # Do NOT raise here — allow the app to start; endpoints will return 503 if pipeline is unavailable
 
 
 class PolicyQARequest(BaseModel):
@@ -56,6 +55,8 @@ async def policy_qa(payload: dict = Body(...)):
         if not question or not str(question).strip():
             raise HTTPException(status_code=422, detail="Question cannot be empty")
         thread_id = thread_id or str(uuid4())
+        if rag_pipeline is None:
+            raise HTTPException(status_code=503, detail="RAG pipeline is not available. Check server logs for initialization errors.")
         final_answer, debug_info = rag_pipeline.ask(
             question=question, thread_id=thread_id
         )
